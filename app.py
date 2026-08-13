@@ -7,7 +7,8 @@ from pathlib import Path
 EVENT_NAME = "9월 정기모임"
 BENEFIT_TITLE = "쿠팡 · 네이버 마진계산기"
 BENEFIT_SUB = "로켓그로스 소싱판정 대시보드"
-BENEFIT_FILE = Path(__file__).parent / "assets" / "소싱판정_대시보드_v3_7_0.html"
+ASSETS_DIR = Path(__file__).parent / "assets"
+BENEFIT_FILE = ASSETS_DIR / "margin_calculator.html"
 DOWNLOAD_NAME = "소싱판정_대시보드_v3.7.0.html"
 FALLBACK_CODE = "GANA0905"  # Secrets 미설정 시 임시로 쓰이는 코드
 # ══════════════════════════════════════════════
@@ -60,14 +61,24 @@ if not st.session_state.unlocked:
     st.caption("🔒 코드는 모임 당일 현장에서 참석자분들께만 안내드립니다.")
 
 else:
-    if not BENEFIT_FILE.exists():
-        st.error(f"파일을 찾을 수 없습니다: {BENEFIT_FILE.name}")
+    # 지정한 파일이 없으면 assets 폴더의 다른 html 파일을 자동으로 사용
+    target = BENEFIT_FILE
+    if not target.exists():
+        candidates = sorted(ASSETS_DIR.glob("*.html")) if ASSETS_DIR.exists() else []
+        target = candidates[0] if candidates else None
+
+    if target is None:
+        st.error("자료 파일을 찾을 수 없습니다. 운영자에게 알려주세요.")
+        with st.expander("진단 정보"):
+            st.write("assets 폴더 존재:", ASSETS_DIR.exists())
+            if ASSETS_DIR.exists():
+                st.write("폴더 안 파일 목록:", [p.name for p in ASSETS_DIR.iterdir()])
     else:
         st.success("확인되었습니다. 아래 버튼으로 내려받으세요.")
 
         st.download_button(
             "📥 마진계산기 다운로드 (HTML)",
-            data=BENEFIT_FILE.read_bytes(),
+            data=target.read_bytes(),
             file_name=DOWNLOAD_NAME,
             mime="text/html",
             type="primary",
