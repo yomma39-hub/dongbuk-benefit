@@ -1,4 +1,5 @@
 import io
+import re
 import zipfile
 from pathlib import Path
 
@@ -9,18 +10,21 @@ import streamlit as st
 # ══════════════════════════════════════════════
 EVENT_NAME = "9월 정기모임"
 BENEFIT_TITLE = "쿠팡 · 네이버 마진계산기"
-BENEFIT_SUB = "로켓그로스 소싱판정 대시보드 v4.2.0"
 
 BASE_DIR = Path(__file__).parent
 PACK_DIR = BASE_DIR / "배포_소싱판정기"
-ZIP_NAME = "소싱판정기_패키지_v4.2.0.zip"
 
-# 표시 순서 · 설명 (파일명은 저장소와 정확히 일치해야 함)
+# 대시보드 파일명 규칙 — 버전은 여기서 자동으로 읽습니다.
+# 새 버전을 올릴 때 이 파일을 고칠 필요가 없습니다.
+# 배포 폴더에 새 html 을 넣고 옛 파일만 지우면 끝입니다.
+DASH_PATTERN = "소싱판정_대시보드_v*.html"
+
+# 표시 순서 · 설명. 키는 파일명의 앞부분만 적으면 됩니다(버전 무관).
 FILE_GUIDE = {
-    "소싱판정_대시보드_v4.2.0.html": "메인 계산기 — 더블클릭하면 브라우저에서 바로 열립니다",
-    "소싱판정기_설명서.html": "사용 설명서 — 입력값과 판정 기준 안내",
-    "윙요율수집기.js": "쿠팡 윙 요율 자동 수집 스크립트",
-    "수집기_사용법.md": "요율 수집기 사용법 (메모장으로 열어보세요)",
+    "소싱판정_대시보드": "메인 계산기 — 더블클릭하면 브라우저에서 바로 열립니다",
+    "소싱판정기_설명서": "사용 설명서 — 입력값과 판정 기준 안내",
+    "윙요율표수집기": "쿠팡 윙 요율표 자동 수집 스크립트",
+    "수집기_사용법": "요율표 수집기 사용법 (메모장으로 열어보세요)",
 }
 
 MIME = {
@@ -33,6 +37,50 @@ FALLBACK_CODE = "GANA0905"  # Secrets 미설정 시 임시로 쓰이는 코드
 # ══════════════════════════════════════════════
 
 BENEFIT_CODE = st.secrets.get("BENEFIT_CODE", FALLBACK_CODE)
+
+
+def dashboard_file():
+    """배포 폴더에서 대시보드 파일을 찾습니다. 여러 개면 버전이 가장 높은 것."""
+    if not PACK_DIR.exists():
+        return None
+
+    def key(p):
+        nums = re.findall(r"\d+", p.stem.split("_v")[-1])
+        return [int(n) for n in nums] or [0]
+
+    hits = sorted(PACK_DIR.glob(DASH_PATTERN), key=key)
+    return hits[-1] if hits else None
+
+
+def dashboard_version():
+    """파일명에서 버전 문자열을 뽑습니다. 예: v4.2.1"""
+    p = dashboard_file()
+    if not p:
+        return ""
+    m = re.search(r"_(v[\d.]+)$", p.stem)
+    return m.group(1) if m else ""
+
+
+def guide_for(name):
+    """파일명 앞부분으로 설명을 찾습니다 (버전 숫자와 무관하게 매칭)."""
+    for prefix, desc in FILE_GUIDE.items():
+        if name.startswith(prefix):
+            return desc
+    return ""
+
+
+def guide_rank(name):
+    """FILE_GUIDE 에 적힌 순서대로 정렬하고, 목록에 없으면 맨 뒤로."""
+    for i, prefix in enumerate(FILE_GUIDE):
+        if name.startswith(prefix):
+            return i
+    return len(FILE_GUIDE)
+
+
+VERSION = dashboard_version()
+DASH_NAME = dashboard_file().name if dashboard_file() else ""
+BENEFIT_SUB = f"로켓그로스 소싱판정 대시보드 {VERSION}".strip()
+ZIP_NAME = f"소싱판정기_패키지_{VERSION}.zip" if VERSION else "소싱판정기_패키지.zip"
 
 st.set_page_config(
     page_title=f"{EVENT_NAME} 참가혜택",
@@ -65,10 +113,8 @@ def collect_files():
     if not PACK_DIR.exists():
         return []
 
-    on_disk = {p.name: p for p in sorted(PACK_DIR.iterdir()) if p.is_file()}
-    ordered = [on_disk.pop(name) for name in FILE_GUIDE if name in on_disk]
-    ordered.extend(on_disk.values())  # 설정에 없는 파일도 누락 없이 포함
-    return ordered
+    files = [p for p in PACK_DIR.iterdir() if p.is_file()]
+    return sorted(files, key=lambda p: (guide_rank(p.name), p.name))
 
 
 @st.cache_data(show_spinner=False)
@@ -125,7 +171,7 @@ else:
         st.markdown("**개별로 받으시려면**")
 
         for path in files:
-            desc = FILE_GUIDE.get(path.name, "")
+            desc = guide_for(path.name)
             if desc:
                 st.caption(f"**{path.name}** — {desc}")
             st.download_button(
@@ -139,11 +185,11 @@ else:
 
         st.divider()
         st.markdown(
-            """
+            f"""
             **사용 방법**
 
             1. ZIP을 받으신 뒤 압축을 풀어주세요
-            2. `소싱판정_대시보드_v4.2.0.html`을 더블클릭하면 브라우저에서 바로 열립니다
+            2. `{DASH_NAME}`을 더블클릭하면 브라우저에서 바로 열립니다
             3. 설치나 로그인이 필요 없습니다
             4. 입력하신 값은 서버로 전송되지 않고 기기 안에만 저장됩니다
             5. 즐겨찾기에 추가해두시면 다음에도 바로 여실 수 있습니다
