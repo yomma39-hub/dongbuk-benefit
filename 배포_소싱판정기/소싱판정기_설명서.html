@@ -215,7 +215,7 @@
     <p class="lede">이 상품을 <b>팔지 말지</b>를 감이 아니라 숫자로 끊어주는 도구입니다.
       부가세와 입출고배송비까지 넣고 계산해서, 실제로 손에 남는 돈을 기준으로 판정합니다.</p>
     <div class="meta">
-      <span>v4.2.0</span><span>쿠팡 로켓그로스 · 네이버 스마트스토어</span>
+      <span>v4.2.1</span><span>쿠팡 로켓그로스 · 네이버 스마트스토어</span>
     </div>
   </header>
 
@@ -360,6 +360,18 @@
 
   <section>
     <div class="sec-head">
+      <span class="eyebrow">핵심 기능</span>
+      <h2>AI에게 물어보기</h2>
+    </div>
+    <p>판정 결과를 <b>마크다운 보고서 한 장</b>으로 복사하거나 <code style="font-family:var(--mono);font-size:13px">.md</code> 파일로 저장할 수 있습니다.
+      그대로 챗GPT나 클로드에 붙여넣고 "이 상품 어떻게 보나요"라고 물으면 됩니다.</p>
+    <p class="note">보고서에는 판정 결과뿐 아니라 <b>입력값 · 산출값 · 적용된 기본 설정 · 계산에 안 들어간 비용</b>까지 함께 담깁니다.
+      받는 쪽 AI가 근거를 오해하거나 없는 숫자를 지어내지 않게 하려는 구성입니다.
+      화면에 이미 계산된 확정값만 옮겨 적으므로 AI가 다시 계산하다 값이 갈릴 일도 없습니다.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
       <span class="eyebrow">요율표</span>
       <h2>배송비를 추측하지 않는 법</h2>
     </div>
@@ -409,7 +421,7 @@
       <h2>무엇이 어디에 있나</h2>
     </div>
     <div class="files">
-      <div><code>소싱판정_대시보드_v4.2.0.html</code><span class="note">대시보드 본체. 더블클릭해서 브라우저로 엽니다.</span></div>
+      <div><code>소싱판정_대시보드_v4.2.1.html</code><span class="note">대시보드 본체. 더블클릭해서 브라우저로 엽니다.</span></div>
       <div><code>윙요율표수집기.js</code><span class="note">윙 요금표 화면 콘솔에 붙여넣어 실행하는 수집기.</span></div>
       <div><code>수집기_사용법.md</code><span class="note">수집기 단계별 안내.</span></div>
       <div><code>wing_fee_….json</code><span class="note">수집한 요율표. 어드민 탭에서 가져오기.</span></div>
@@ -420,8 +432,8 @@
   </section>
 
   <footer>
-    <span>소싱 판정 대시보드 v4.2.0</span>
-    <span>2026-08-26</span>
+    <span>소싱 판정 대시보드 v4.2.1</span>
+    <span>2026-08-27</span>
   </footer>
 
 </div>
