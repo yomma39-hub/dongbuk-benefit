@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="쿠팡 로켓그로스·네이버 소싱 판정 대시보드 사용 설명서">
+<style>
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0}
+  img{max-width:100%}
+</style>
+<title>소싱 판정 매뉴얼</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@600;700&display=swap">
+
+<style>
+  :root{
+    --paper:#F7F8FA;
+    --surface:#FFFFFF;
+    --sunk:#EFF2F6;
+    --ink:#16202E;
+    --muted:#5B6779;
+    --faint:#8A94A3;
+    --rule:#DFE3EA;
+    --accent:#1E4B7A;
+    --accent-soft:#E7EEF6;
+    --go:#0B7A54;      --go-bg:#E6F3ED;
+    --hold:#B4690E;    --hold-bg:#FBF0DF;
+    --nogo:#B32626;    --nogo-bg:#F9E8E8;
+    --shadow:0 1px 2px rgba(22,32,46,.05), 0 8px 24px -12px rgba(22,32,46,.18);
+    --sans:"IBM Plex Sans KR",-apple-system,BlinkMacSystemFont,"Malgun Gothic",sans-serif;
+    --serif:"Noto Serif KR",Georgia,"Batang",serif;
+    --mono:"IBM Plex Mono","IBM Plex Sans KR",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#0D1219;  --surface:#151D28;  --sunk:#1B2531;
+      --ink:#E7ECF3;    --muted:#9AA6B6;    --faint:#6E7A8B;
+      --rule:#28323F;
+      --accent:#8CBBE8; --accent-soft:#1A2B3D;
+      --go:#4FC496;     --go-bg:#12281F;
+      --hold:#E0A64B;   --hold-bg:#2A2214;
+      --nogo:#E97C7C;   --nogo-bg:#2C1A1A;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0D1219;  --surface:#151D28;  --sunk:#1B2531;
+    --ink:#E7ECF3;    --muted:#9AA6B6;    --faint:#6E7A8B;
+    --rule:#28323F;
+    --accent:#8CBBE8; --accent-soft:#1A2B3D;
+    --go:#4FC496;     --go-bg:#12281F;
+    --hold:#E0A64B;   --hold-bg:#2A2214;
+    --nogo:#E97C7C;   --nogo-bg:#2C1A1A;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--sans); font-size:16px; line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:820px; margin:0 auto; padding:56px 24px 80px}
+  @media(max-width:600px){ .wrap{padding:36px 18px 60px} }
+
+  h1,h2,h3{font-family:var(--serif); text-wrap:balance; margin:0}
+  h1{font-size:clamp(30px,5.2vw,44px); font-weight:700; line-height:1.25; letter-spacing:-.02em}
+  h2{font-size:clamp(21px,3.2vw,26px); font-weight:700; line-height:1.35}
+  h3{font-size:17px; font-weight:600}
+  p{margin:0}
+  b,strong{font-weight:600}
+
+  .eyebrow{
+    font-family:var(--mono); font-size:11px; font-weight:500;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--accent);
+  }
+  .lede{font-size:18px; color:var(--muted); line-height:1.7}
+  .note{font-size:14px; color:var(--muted); line-height:1.7}
+  .num{font-family:var(--mono); font-variant-numeric:tabular-nums; font-weight:500}
+
+  header{
+    display:flex; flex-direction:column; gap:14px;
+    padding-bottom:30px; border-bottom:2px solid var(--ink);
+  }
+  header .meta{
+    display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center;
+    font-family:var(--mono); font-size:12px; color:var(--faint);
+  }
+
+  section{display:flex; flex-direction:column; gap:18px; padding-top:44px}
+  .sec-head{display:flex; flex-direction:column; gap:7px}
+
+  /* ---- 두 축 카드 ---- */
+  .axes{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  @media(max-width:640px){ .axes{grid-template-columns:1fr} }
+  .axis{
+    background:var(--surface); border:1px solid var(--rule); border-radius:3px;
+    padding:22px; display:flex; flex-direction:column; gap:12px; box-shadow:var(--shadow);
+  }
+  .axis .tag{
+    font-family:var(--mono); font-size:11px; letter-spacing:.14em;
+    color:var(--surface); background:var(--accent);
+    padding:3px 8px; border-radius:2px; align-self:flex-start;
+  }
+  .formula{
+    font-family:var(--mono); font-size:14px; background:var(--sunk);
+    padding:11px 13px; border-radius:2px; color:var(--ink);
+    overflow-x:auto; white-space:nowrap;
+  }
+  .thresh{display:flex; flex-direction:column; gap:6px; margin-top:2px}
+  .thresh div{
+    display:flex; align-items:baseline; gap:9px; font-size:14px;
+    padding-bottom:6px; border-bottom:1px dotted var(--rule);
+  }
+  .thresh div:last-child{border-bottom:0; padding-bottom:0}
+  .pill{
+    font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.04em;
+    padding:2px 8px; border-radius:2px; white-space:nowrap; flex-shrink:0;
+  }
+  .p-go{color:var(--go); background:var(--go-bg)}
+  .p-hold{color:var(--hold); background:var(--hold-bg)}
+  .p-nogo{color:var(--nogo); background:var(--nogo-bg)}
+
+  /* ---- 매트릭스 ---- */
+  .matrix-shell{overflow-x:auto; padding:2px}
+  table.mx{border-collapse:separate; border-spacing:5px; min-width:460px; width:100%}
+  table.mx th{
+    font-family:var(--mono); font-size:11px; font-weight:500; color:var(--muted);
+    letter-spacing:.06em; padding:5px 4px; text-align:center; font-weight:500;
+  }
+  table.mx th.rowh{text-align:right; padding-right:11px; white-space:nowrap}
+  table.mx td{
+    text-align:center; padding:15px 8px; border-radius:3px;
+    font-family:var(--mono); font-size:13px; font-weight:600; letter-spacing:.03em;
+  }
+  td.c-go{color:var(--go); background:var(--go-bg); box-shadow:inset 0 0 0 1.5px var(--go)}
+  td.c-hold{color:var(--hold); background:var(--hold-bg)}
+  td.c-nogo{color:var(--nogo); background:var(--nogo-bg); box-shadow:inset 0 0 0 1.5px var(--nogo)}
+  .corner{font-family:var(--mono); font-size:10px; color:var(--faint); text-align:right; padding-right:11px}
+
+  /* ---- 순서 ---- */
+  ol.steps{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; counter-reset:s}
+  ol.steps li{
+    counter-increment:s; display:grid; grid-template-columns:34px 1fr; gap:16px;
+    padding:16px 0; border-bottom:1px solid var(--rule);
+  }
+  ol.steps li:last-child{border-bottom:0}
+  ol.steps li::before{
+    content:counter(s,decimal-leading-zero);
+    font-family:var(--mono); font-size:12px; font-weight:600; color:var(--accent);
+    padding-top:4px; letter-spacing:.02em;
+  }
+  ol.steps .body{display:flex; flex-direction:column; gap:5px}
+
+  /* ---- 일반 리스트 ---- */
+  ul.plain{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:13px}
+  ul.plain li{display:grid; grid-template-columns:9px 1fr; gap:13px; align-items:start}
+  ul.plain li::before{
+    content:""; width:5px; height:5px; margin-top:11px; border-radius:50%;
+    background:var(--accent); display:block;
+  }
+
+  /* ---- 콜아웃 ---- */
+  .call{
+    border-left:3px solid var(--accent); background:var(--accent-soft);
+    padding:16px 20px; border-radius:0 3px 3px 0;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .call.warn{border-left-color:var(--hold); background:var(--hold-bg)}
+
+  /* ---- 비교표 ---- */
+  .cmp-shell{overflow-x:auto}
+  table.cmp{border-collapse:collapse; width:100%; min-width:420px; font-size:14px}
+  table.cmp th, table.cmp td{
+    text-align:left; padding:11px 12px; border-bottom:1px solid var(--rule); vertical-align:top;
+  }
+  table.cmp thead th{
+    font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--faint); font-weight:500; border-bottom:1.5px solid var(--ink);
+  }
+  table.cmp td.n{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+  table.cmp tbody tr:last-child td{border-bottom:0}
+
+  /* ---- 파일 목록 ---- */
+  .files{display:flex; flex-direction:column; gap:0}
+  .files div{
+    display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:baseline;
+    padding:11px 0; border-bottom:1px solid var(--rule); font-size:14px;
+  }
+  .files div:last-child{border-bottom:0}
+  .files code{
+    font-family:var(--mono); font-size:12.5px; color:var(--accent);
+    background:var(--sunk); padding:2px 7px; border-radius:2px; white-space:nowrap;
+  }
+
+  footer{
+    margin-top:56px; padding-top:22px; border-top:1px solid var(--rule);
+    font-family:var(--mono); font-size:12px; color:var(--faint);
+    display:flex; flex-wrap:wrap; gap:6px 20px;
+  }
+  a{color:var(--accent)}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">사용 설명서</span>
+    <h1>소싱 판정 대시보드</h1>
+    <p class="lede">이 상품을 <b>팔지 말지</b>를 감이 아니라 숫자로 끊어주는 도구입니다.
+      부가세와 입출고배송비까지 넣고 계산해서, 실제로 손에 남는 돈을 기준으로 판정합니다.</p>
+    <div class="meta">
+      <span>v4.2.0</span><span>쿠팡 로켓그로스 · 네이버 스마트스토어</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">왜 쓰나</span>
+      <h2>기존의 마진계산기와 뭐가 다른가</h2>
+    </div>
+    <p>기존의 마진계산기는 "얼마 남는다"까지만 알려줍니다. 그런데 실제로 물어야 할 건 두 가지예요.
+      <b>남는 돈이 먹고살 만한가</b>, 그리고 <b>광고를 돌릴 여력이 있는가</b>.
+      마진이 커도 월 판매량이 적으면 의미가 없고, 월마진이 커도 마진율이 얇으면 광고 한 번에 다 날아갑니다.</p>
+    <p>그래서 이 도구는 <b>두 축을 따로 보고 둘 다 통과할 때만 GO</b>를 줍니다.</p>
+    <div class="call">
+      <h3>추정값을 쓰지 않습니다</h3>
+      <p class="note">입출고배송비는 쿠팡이 카테고리·판매가·사이즈별로 다르게 매깁니다.
+        이 도구는 윙에서 긁어온 실제 요율표를 쓰고, 없으면 <b>비워둔 채 경고</b>합니다.
+        어림잡은 숫자로 GO를 내주지 않습니다.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">판정 기준</span>
+      <h2>두 개의 축</h2>
+    </div>
+    <div class="axes">
+      <div class="axis">
+        <span class="tag">A축</span>
+        <h3>최소광고수익률</h3>
+        <p class="note">광고비로 마진을 전부 까먹는 지점. <b>낮을수록 광고 여력이 큽니다.</b>
+          3.0배면 광고 매출이 광고비의 3배는 나와야 본전이라는 뜻입니다.</p>
+        <div class="formula">1.1 ÷ 마진율</div>
+        <div class="thresh">
+          <div><span class="pill p-go">GO</span><span><span class="num">3.00배</span> 이하 <span class="note">(마진율 36.7% 이상)</span></span></div>
+          <div><span class="pill p-hold">보류</span><span><span class="num">3.50배</span> 이하 <span class="note">(마진율 31.4% 이상)</span></span></div>
+          <div><span class="pill p-nogo">NO-GO</span><span><span class="num">3.50배</span> 초과</span></div>
+        </div>
+      </div>
+      <div class="axis">
+        <span class="tag">B축</span>
+        <h3>예상 월마진</h3>
+        <p class="note">한 달에 실제로 손에 남는 금액.
+          조회수 × 전환율로 추정하거나, 이미 팔고 있다면 <b>실판매량</b>을 넣습니다.</p>
+        <div class="formula">개당 마진 × 월 판매량</div>
+        <div class="thresh">
+          <div><span class="pill p-go">GO</span><span><span class="num">50만원</span> 이상</span></div>
+          <div><span class="pill p-hold">보류</span><span><span class="num">30만원</span> 이상</span></div>
+          <div><span class="pill p-nogo">NO-GO</span><span><span class="num">30만원</span> 미만</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">기준 금액과 배율은 어드민 탭에서 바꿀 수 있습니다. 위 숫자는 기본값입니다.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">3 × 3</span>
+      <h2>두 축이 만나는 자리</h2>
+    </div>
+    <p>규칙은 하나입니다. <b>두 축이 같은 등급일 때만 그 등급이 나오고, 어긋나면 무조건 보류입니다.</b>
+      한쪽이 아무리 좋아도 다른 쪽을 덮어주지 않습니다.</p>
+    <div class="matrix-shell">
+      <table class="mx">
+        <thead>
+          <tr>
+            <th class="corner">B축 ↓ &nbsp; A축 →</th>
+            <th>광고여력 GO</th><th>광고여력 보류</th><th>광고여력 NO-GO</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th class="rowh">월마진 GO</th>
+            <td class="c-go">GO</td><td class="c-hold">보류</td><td class="c-hold">보류</td>
+          </tr>
+          <tr>
+            <th class="rowh">월마진 보류</th>
+            <td class="c-hold">보류</td><td class="c-hold">보류</td><td class="c-hold">보류</td>
+          </tr>
+          <tr>
+            <th class="rowh">월마진 NO-GO</th>
+            <td class="c-hold">보류</td><td class="c-hold">보류</td><td class="c-nogo">NO-GO</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="call warn">
+      <h3>마진이 마이너스면 계산을 건너뜁니다</h3>
+      <p class="note">개당 마진이 0 이하로 나오면 다른 축을 볼 것도 없이 바로 NO-GO입니다.
+        팔수록 손해인 상품에는 판매량이 의미가 없기 때문입니다.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">쓰는 순서</span>
+      <h2>한 상품 판정하기</h2>
+    </div>
+    <ol class="steps">
+      <li><div class="body">
+        <h3>플랫폼 고르기</h3>
+        <p class="note">쿠팡 로켓그로스와 네이버 스마트스토어 중 선택합니다.
+          판정 기준은 같고 원가·수수료 계산만 갈립니다.</p>
+      </div></li>
+      <li><div class="body">
+        <h3>판매가와 원가 넣기</h3>
+        <p class="note">국내 매입이면 원가만 넣으면 됩니다.
+          1688이면 위안화 상품가를 넣고 <b>직접 매입</b>과 <b>배대지 직입고</b> 중 조달 경로를 고릅니다.
+          배대지는 관세·국제운임·통관비를 로트 실비로 잡아 개당으로 나눕니다.</p>
+      </div></li>
+      <li><div class="body">
+        <h3>요율표에서 카테고리 고르기</h3>
+        <p class="note">고르면 판매가와 사이즈에 맞는 <b>입출고배송비가 자동으로 채워집니다.</b>
+          목록에 없으면 직접 입력하거나, 아래 수집기로 새로 받아 넣으세요.</p>
+      </div></li>
+      <li><div class="body">
+        <h3>수요 넣기</h3>
+        <p class="note">아직 안 팔아본 상품이면 <b>조회수 추정</b> — 예상 조회수와 전환율(기본 3%)을 넣습니다.
+          이미 팔고 있다면 <b>실판매 실적</b>에 실제 판매량을 넣는 쪽이 훨씬 정확합니다.</p>
+      </div></li>
+      <li><div class="body">
+        <h3>판정 읽고 저장하기</h3>
+        <p class="note">GO / 보류 / NO-GO와 함께 <b>왜 그렇게 나왔는지</b> 문장으로 설명됩니다.
+          저장해두면 기록 탭에 쌓이고, 나중에 기준을 바꾸면 과거 판정도 새 기준으로 다시 매겨집니다.</p>
+      </div></li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">핵심 기능</span>
+      <h2>역산 — "얼마면 되는데?"</h2>
+    </div>
+    <p>NO-GO가 떴을 때 그냥 버리지 않아도 됩니다. 대시보드가 <b>GO가 되는 최소 조건을 거꾸로 계산해</b> 알려줍니다.</p>
+    <ul class="plain">
+      <li><span><b>판매가</b>를 얼마까지 올리면 GO인가</span></li>
+      <li><span><b>원가</b>를 얼마까지 낮추면 GO인가 — 공급처와 협상할 때 쓸 목표 단가</span></li>
+      <li><span><b>월 판매량</b>(또는 조회수)이 얼마나 나와야 GO인가</span></li>
+    </ul>
+    <p class="note">셋 중 하나라도 현실적으로 도달 가능하면 다시 볼 상품이고,
+      전부 비현실적이면 그때 버리면 됩니다. "안 된다"가 아니라 <b>"이만큼이면 된다"</b>를 알려주는 게 핵심입니다.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">요율표</span>
+      <h2>배송비를 추측하지 않는 법</h2>
+    </div>
+    <p>쿠팡 입출고배송비는 <b>판매가 18구간 × 사이즈 6종 × 요금 3층</b>으로 갈립니다.
+      같은 상품도 9,900원에 팔 때와 10,100원에 팔 때 요금이 다릅니다.</p>
+    <div class="cmp-shell">
+      <table class="cmp">
+        <thead><tr><th>요금 층</th><th>뜻</th><th>예시 · 극소형</th></tr></thead>
+        <tbody>
+          <tr><td>정상가</td><td>할인 없는 기본 요금</td><td class="n">3,850원</td></tr>
+          <tr><td>할인가</td><td>카테고리 프로모션 적용</td><td class="n">2,950원</td></tr>
+          <tr><td>전용할인가</td><td>일부 카테고리 추가 할인</td><td class="n">2,445원</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">기본 설정은 <b>전용할인가까지</b>입니다. 있으면 그 값을 쓰고, 없으면 할인가, 그것도 없으면 정상가로 내려갑니다.
+      쿠팡이 공개한 값을 그대로 쓰는 방식이라 따로 만질 일은 없습니다.</p>
+    <div class="call">
+      <h3>요율표 채우기</h3>
+      <p class="note">윙 요금표 화면에서 <b>수집기</b>를 실행하고, 카테고리를 바꿔가며 저장 버튼만 누르면 됩니다.
+        화면에 그려진 표를 그대로 읽어오니 눈으로 검산할 필요가 없습니다.
+        다 모으면 JSON으로 내보내 어드민 탭에서 한꺼번에 넣습니다.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">이득</span>
+      <h2>이 도구가 막아주는 것</h2>
+    </div>
+    <ul class="plain">
+      <li><span><b>부가세를 빼먹은 계산.</b> 매출세액에서 원가 매입세액과 수수료·입출고 VAT를 공제한 실제 납부액까지 반영합니다.
+        VAT를 빼먹으면 마진이 10% 부풀려 보입니다.</span></li>
+      <li><span><b>배송비 어림짐작.</b> 저가 소형 상품은 구간 하나 차이로 500원 이상 벌어집니다.
+        개당 마진이 1,000원인 상품이라면 판정이 뒤집히는 크기입니다.</span></li>
+      <li><span><b>광고 여력 없는 상품에 광고 태우기.</b> 마진율이 얇으면 광고를 붙이는 순간 적자가 됩니다.
+        A축이 그걸 미리 걸러냅니다.</span></li>
+      <li><span><b>기준 없는 판단.</b> 오늘의 GO와 지난달의 GO가 같은 기준이었는지 기록이 증명해줍니다.</span></li>
+    </ul>
+    <p class="note">반품율은 참고 지표로만 보여주고 <b>판정에는 반영하지 않습니다.</b>
+      광고비·포장 부자재·제주 도서산간 추가배송비·보관비도 빠져 있습니다. 실제 수익은 여기서 더 내려갑니다.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">파일</span>
+      <h2>무엇이 어디에 있나</h2>
+    </div>
+    <div class="files">
+      <div><code>소싱판정_대시보드_v4.2.0.html</code><span class="note">대시보드 본체. 더블클릭해서 브라우저로 엽니다.</span></div>
+      <div><code>윙요율표수집기.js</code><span class="note">윙 요금표 화면 콘솔에 붙여넣어 실행하는 수집기.</span></div>
+      <div><code>수집기_사용법.md</code><span class="note">수집기 단계별 안내.</span></div>
+      <div><code>wing_fee_….json</code><span class="note">수집한 요율표. 어드민 탭에서 가져오기.</span></div>
+    </div>
+    <p class="note"><b>위 파일은 모두 이 설명서와 같은 폴더에 있습니다.</b></p>
+    <p class="note">판정 기록과 요율표는 브라우저에 저장됩니다.
+      컴퓨터를 바꾸거나 새 버전으로 넘어갈 때는 <b>기록 탭에서 백업 파일을 먼저 내보내세요.</b></p>
+  </section>
+
+  <footer>
+    <span>소싱 판정 대시보드 v4.2.0</span>
+    <span>2026-08-26</span>
+  </footer>
+
+</div>
+
+</body>
+</html>
